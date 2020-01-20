@@ -42,7 +42,7 @@
 #include <shared_functions.h>
 #include <custom_characteristics.h>
 #include <rgbw_lights.h>
-
+#include <adv_button.h>
 
 #include "main.h"
 
@@ -55,10 +55,11 @@
 #define LPF_SHIFT 8 // divide by 256
 #define LPF_INTERVAL 10  // in milliseconds
 #define IR_RX_GPIO 4
-#define RED_PWM_PIN 12
-#define GREEN_PWM_PIN 5
-#define BLUE_PWM_PIN 13
-#define WHITE_PWM_PIN 15
+#define RED_PWM_PIN    5  // D1
+#define GREEN_PWM_PIN  12 // D6 ; //16 // D0
+#define BLUE_PWM_PIN   4  // D2
+#define WHITE_PWM_PIN  2  // D4
+#define BUTTON_GPIO    0  // D3 Button GPIO pin - Click On/Off, 30s Hold Reset
 
 
 // add this section to make your device OTA capable
@@ -75,6 +76,9 @@ float led_hue = 360;              // hue is scaled 0 to 360
 float led_saturation = 100;      // saturation is scaled 0 to 100
 float led_brightness = 100;     // brightness is scaled 0 to 100
 bool led_on = false;            // on is boolean on or off
+
+int button_gpio = BUTTON_GPIO;
+int double_click_switch = off_effect;    // On double click switch, default set to smooth_effect
 
 int white_default_gpio = WHITE_PWM_PIN;
 int red_default_gpio = RED_PWM_PIN;
@@ -285,7 +289,7 @@ void led_strip_init (){
     hsi_colours[purple_button] = (hsi_color_t) { { 280, 100, 75 }};
     hsi_colours[pink_button] = (hsi_color_t) { { 300, 100, 100 }};
 
-    xTaskCreate(ir_dump_task, "read_ir_task", 256, NULL, 2, NULL);
+    // xTaskCreate(ir_dump_task, "read_ir_task", 256, NULL, 2, NULL);
 
 }
 
@@ -359,6 +363,31 @@ void accessory_init (void ){
     
 }
 
+
+void singlepress_callback(uint8_t gpio, void *args, const uint8_t param)  {
+    printf(">>>>> Button: Single Press function called using GPIO->%i\n", gpio);
+    on.value.bool_value = !on.value.bool_value;
+    led_on = on.value.bool_value;
+    homekit_characteristic_notify(&on,on.value );
+
+    sdk_os_timer_arm (&save_timer, SAVE_DELAY, 0 );
+    sdk_os_timer_arm (&rgbw_onoff_timer, RGBW_SET_DELAY, 0 );
+}
+
+void doublepress_callback(uint8_t gpio, void *args, const uint8_t param) { 
+    printf(">>>>> Button: Double Press function called using GPIO->%i\n", gpio);
+    // double_click_switch = (double_click_switch + 1) % 7;
+    double_click_switch = (double_click_switch == off_effect) ? smooth_effect : off_effect;
+    int effect = double_click_switch;
+    printf("double_click_switch set effect = %i\n", effect);
+    colour_effect_start_stop (effect);
+}
+
+void verylongpress_callback(uint8_t gpio, void *args, const uint8_t param) { 
+    printf(">>>>> Button: Very Long Press function called using GPIO->%i\n", gpio);
+    reset_configuration();
+}
+
 void user_init(void) {
     
     standard_init (&name, &manufacturer, &model, &serial, &revision);
@@ -366,5 +395,10 @@ void user_init(void) {
     
     wifi_config_init(DEVICE_NAME, NULL, on_wifi_ready);
     
-    
+
+    adv_button_set_evaluate_delay(10);
+    adv_button_create(button_gpio, true, false);  
+    adv_button_register_callback_fn(button_gpio, singlepress_callback, SINGLEPRESS_TYPE, NULL, 0);
+    adv_button_register_callback_fn(button_gpio, doublepress_callback, DOUBLEPRESS_TYPE, NULL, 0);
+    adv_button_register_callback_fn(button_gpio, verylongpress_callback, VERYLONGPRESS_TYPE, NULL, 0);
 }
