@@ -343,6 +343,7 @@ void recover_from_reset (int reason){
     /* called if we restarted abnormally */
     printf ("%s: reason %d\n", __func__, reason);
     load_characteristic_from_flash(&on);
+    led_on = on.value.bool_value;
 }
 
 void accessory_init_not_paired (void) {
@@ -356,6 +357,7 @@ void accessory_init (void ){
     led_strip_init ();
 
     /* sent out values loded from flash, if nothing was loaded from flash then this will be default values */
+    homekit_characteristic_notify(&on,on.value);
     homekit_characteristic_notify(&hue,hue.value);
     homekit_characteristic_notify(&saturation,saturation.value );
     homekit_characteristic_notify(&brightness,brightness.value );
