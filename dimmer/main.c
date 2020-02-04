@@ -41,24 +41,24 @@
 #include <ir/generic.h>
 #include <shared_functions.h>
 #include <custom_characteristics.h>
-#include <rgbw_lights.h>
+#include <dimmer_lights.h>
 #include <adv_button.h>
 
 #include "main.h"
 
 #define DEVICE_MANUFACTURER "HassLight"
 #define DEVICE_NAME "HassLight"
-#define DEVICE_MODEL "RGBW"
+#define DEVICE_MODEL "Dimmer"
 #define DEVICE_SERIAL "12345678"
 #define FW_VERSION "1.0"
 
 #define LPF_SHIFT 8 // divide by 256
 #define LPF_INTERVAL 10  // in milliseconds
 #define IR_RX_GPIO 4
-#define RED_PWM_PIN    5  // D1
-#define GREEN_PWM_PIN  12 // D6 ; //16 // D0
-#define BLUE_PWM_PIN   4  // D2
-#define WHITE_PWM_PIN  2  // D4
+// #define RED_PWM_PIN    5  // D1
+// #define GREEN_PWM_PIN  12 // D6 ; //16 // D0
+// #define BLUE_PWM_PIN   4  // D2
+#define WHITE_PWM_PIN  5 //2  // D4
 #define BUTTON_GPIO    0  // D3 Button GPIO pin - Click On/Off, 30s Hold Reset
 
 
@@ -81,9 +81,9 @@ int button_gpio = BUTTON_GPIO;
 int double_click_switch = off_effect;    // On double click switch, default set to smooth_effect
 
 int white_default_gpio = WHITE_PWM_PIN;
-int red_default_gpio = RED_PWM_PIN;
-int green_default_gpio = GREEN_PWM_PIN;
-int blue_default_gpio = BLUE_PWM_PIN;
+// int red_default_gpio = RED_PWM_PIN;
+// int green_default_gpio = GREEN_PWM_PIN;
+// int blue_default_gpio = BLUE_PWM_PIN;
 
 rgb_color_t current_color = { { 0, 0, 0, 0 } };
 rgb_color_t target_color = { { 0, 0, 0, 0 } };
@@ -109,17 +109,17 @@ homekit_characteristic_t brightness = HOMEKIT_CHARACTERISTIC_(BRIGHTNESS, 100,
                                                               .getter = led_brightness_get,
                                                               .setter = led_brightness_set);
 
-homekit_characteristic_t hue = HOMEKIT_CHARACTERISTIC_(HUE, 0,
-                                                       .getter = led_hue_get,
-                                                       .setter = led_hue_set);
+// homekit_characteristic_t hue = HOMEKIT_CHARACTERISTIC_(HUE, 0,
+//                                                        .getter = led_hue_get,
+//                                                        .setter = led_hue_set);
 
-homekit_characteristic_t saturation = HOMEKIT_CHARACTERISTIC_(SATURATION, 0,
-                                                              .getter = led_saturation_get,
-                                                              .setter = led_saturation_set);
+// homekit_characteristic_t saturation = HOMEKIT_CHARACTERISTIC_(SATURATION, 0,
+//                                                               .getter = led_saturation_get,
+//                                                               .setter = led_saturation_set);
 
-homekit_characteristic_t red_gpio     = HOMEKIT_CHARACTERISTIC_( CUSTOM_RED_GPIO, RED_PWM_PIN, .callback=HOMEKIT_CHARACTERISTIC_CALLBACK(on_update) );
-homekit_characteristic_t green_gpio   = HOMEKIT_CHARACTERISTIC_( CUSTOM_GREEN_GPIO, GREEN_PWM_PIN, .callback=HOMEKIT_CHARACTERISTIC_CALLBACK(on_update) );
-homekit_characteristic_t blue_gpio    = HOMEKIT_CHARACTERISTIC_( CUSTOM_BLUE_GPIO, BLUE_PWM_PIN, .callback=HOMEKIT_CHARACTERISTIC_CALLBACK(on_update) );
+// homekit_characteristic_t red_gpio     = HOMEKIT_CHARACTERISTIC_( CUSTOM_RED_GPIO, RED_PWM_PIN, .callback=HOMEKIT_CHARACTERISTIC_CALLBACK(on_update) );
+// homekit_characteristic_t green_gpio   = HOMEKIT_CHARACTERISTIC_( CUSTOM_GREEN_GPIO, GREEN_PWM_PIN, .callback=HOMEKIT_CHARACTERISTIC_CALLBACK(on_update) );
+// homekit_characteristic_t blue_gpio    = HOMEKIT_CHARACTERISTIC_( CUSTOM_BLUE_GPIO, BLUE_PWM_PIN, .callback=HOMEKIT_CHARACTERISTIC_CALLBACK(on_update) );
 homekit_characteristic_t white_gpio   = HOMEKIT_CHARACTERISTIC_( CUSTOM_WHITE_GPIO, WHITE_PWM_PIN, .callback=HOMEKIT_CHARACTERISTIC_CALLBACK(on_update) );
 
 homekit_characteristic_t colours_gpio_test   = HOMEKIT_CHARACTERISTIC_(CUSTOM_COLOURS_GPIO_TEST, false , .setter=colours_gpio_test_set, .getter=colours_gpio_test_get);
@@ -223,8 +223,8 @@ void ir_dump_task(void *arg) {
             case orange_button:
             case sky_blue_button:
                 printf ("%s: LED command %d\n",__func__, cmd);
-                hue.value = HOMEKIT_FLOAT (hsi_colours[cmd].hue);
-                saturation.value = HOMEKIT_FLOAT (hsi_colours[cmd].saturation);
+                // hue.value = HOMEKIT_FLOAT (hsi_colours[cmd].hue);
+                // saturation.value = HOMEKIT_FLOAT (hsi_colours[cmd].saturation);
                 brightness.value = HOMEKIT_INT (hsi_colours[cmd].brightness);
                 break;
             default:
@@ -232,13 +232,13 @@ void ir_dump_task(void *arg) {
                 break;
         }
 
-        homekit_characteristic_notify(&hue,hue.value );
-        homekit_characteristic_notify(&saturation,saturation.value );
+        // homekit_characteristic_notify(&hue,hue.value );
+        // homekit_characteristic_notify(&saturation,saturation.value );
         homekit_characteristic_notify(&brightness,brightness.value );
         sdk_os_timer_arm (&save_timer, SAVE_DELAY, 0 );
         
-        led_hue = hue.value.float_value;
-        led_saturation = saturation.value.float_value;
+        // led_hue = hue.value.float_value;
+        // led_saturation = saturation.value.float_value;
         led_brightness = brightness.value.int_value;
 
         colour_effect_start_stop (effect);
@@ -248,7 +248,7 @@ void ir_dump_task(void *arg) {
                 sdk_os_timer_arm (&rgbw_set_timer, RGBW_SET_DELAY, 0 );
             } else {
                 printf ("%s: Led on false so stopping Multi PWM\n", __func__);
-                set_colours (0, 0, 0, 0);
+                set_colours (0);
                 multipwm_stop(&pwm_info);
                 sdk_os_timer_disarm (&rgbw_set_timer);
             }
@@ -262,11 +262,11 @@ void led_strip_init (){
 
     /* set th default values for the GPIOs incase we need to rest them later */
 
-    rgbw_lights_init();
+    dimmer_lights_init();
     
     /* store the values loaded, if none loaded then it wil be defaults */
-    led_hue = hue.value.float_value;
-    led_saturation = saturation.value.float_value;
+    // led_hue = hue.value.float_value;
+    // led_saturation = saturation.value.float_value;
     led_brightness = brightness.value.int_value;
     
     hsi_colours[white_button]  = (hsi_color_t) {{0.0, 0.0, 100}};
@@ -306,14 +306,14 @@ homekit_accessory_t *accessories[] = {
             NULL
         }),
         HOMEKIT_SERVICE(LIGHTBULB, .primary = true, .characteristics = (homekit_characteristic_t*[]) {
-            HOMEKIT_CHARACTERISTIC(NAME, "LED Strip"),
+            HOMEKIT_CHARACTERISTIC(NAME, "HassLight Dimmer"),
             &on,
-            &saturation,
-            &hue,
+            // &saturation,
+            // &hue,
             &brightness,
-            &red_gpio,
-            &green_gpio,
-            &blue_gpio,
+            // &red_gpio,
+            // &green_gpio,
+            // &blue_gpio,
             &white_gpio,
             &ota_trigger,
             &wifi_reset,
@@ -334,8 +334,8 @@ homekit_accessory_t *accessories[] = {
 
 homekit_server_config_t config = {
     .accessories = accessories,
-    .password = "111-11-111" ,
-    .setupId = "1342",
+    .password = "021-54-288",
+    .setupId="1Q84",
     .on_event = on_homekit_event
 };
 
@@ -353,15 +353,15 @@ void accessory_init_not_paired (void) {
 void accessory_init (void ){
     /* initalise anything you don't want started until wifi and pairing is confirmed */
     get_sysparam_info();
-    printf ("%s: GPIOS are set as follows : W=%d, R=%d, G=%d, B=%d\n",__func__, white_gpio.value.int_value,red_gpio.value.int_value, green_gpio.value.int_value, blue_gpio.value.int_value );
+    printf ("%s: GPIOS are set as follows : W=%d, \n",__func__, white_gpio.value.int_value );
     led_strip_init ();
 
     /* sent out values loded from flash, if nothing was loaded from flash then this will be default values */
     homekit_characteristic_notify(&on,on.value);
-    homekit_characteristic_notify(&hue,hue.value);
-    homekit_characteristic_notify(&saturation,saturation.value );
+    // homekit_characteristic_notify(&hue,hue.value);
+    // homekit_characteristic_notify(&saturation,saturation.value );
     homekit_characteristic_notify(&brightness,brightness.value );
-    homekit_characteristic_notify(&pure_white,pure_white.value );
+    // homekit_characteristic_notify(&pure_white,pure_white.value );
     
 }
 
@@ -393,7 +393,6 @@ void verylongpress_callback(uint8_t gpio, void *args, const uint8_t param) {
 void user_init(void) {
     
     standard_init_no_ota (&name, &manufacturer, &model, &serial, &revision);
-    
     
     wifi_config_init(DEVICE_NAME, NULL, on_wifi_ready);
     

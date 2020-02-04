@@ -46,9 +46,9 @@
 
 #include "main.h"
 
-#define DEVICE_MANUFACTURER "David B Brown"
-#define DEVICE_NAME "Led_Strip"
-#define DEVICE_MODEL "RGBW"
+#define DEVICE_MANUFACTURER "HassLight"
+#define DEVICE_NAME "HassLight"
+#define DEVICE_MODEL "RGB"
 #define DEVICE_SERIAL "12345678"
 #define FW_VERSION "1.0"
 
@@ -392,7 +392,7 @@ void verylongpress_callback(uint8_t gpio, void *args, const uint8_t param) {
 
 void user_init(void) {
     
-    standard_init (&name, &manufacturer, &model, &serial, &revision);
+    standard_init_no_ota (&name, &manufacturer, &model, &serial, &revision);
     
     
     wifi_config_init(DEVICE_NAME, NULL, on_wifi_ready);

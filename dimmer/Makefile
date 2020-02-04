@@ -1,4 +1,4 @@
-PROGRAM = rgbw
+PROGRAM = dimmer
 
 EXTRA_COMPONENTS = \
 extras/dht \
@@ -18,7 +18,7 @@ $(abspath ../components/esp-homekit-common-functions/ota)\
 $(abspath ../components/esp-homekit-common-functions/custom_characteristics)\
 $(abspath ../components/esp-homekit-common-functions/shared_functions)\
 $(abspath ../components/esp-homekit-common-functions/colour_conversion)\
-$(abspath ../components/esp-homekit-common-functions/rgbw_lights)
+$(abspath ../components/esp-homekit-common-functions/dimmer_lights)
 
 
 FLASH_SIZE ?= 8
