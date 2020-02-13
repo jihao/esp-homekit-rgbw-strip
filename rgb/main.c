@@ -262,7 +262,7 @@ void led_strip_init (){
 
     /* set th default values for the GPIOs incase we need to rest them later */
 
-    rgb_lights_init();
+    // rgb_lights_init();
     
     /* store the values loaded, if none loaded then it wil be defaults */
     led_hue = hue.value.float_value;
@@ -334,8 +334,8 @@ homekit_accessory_t *accessories[] = {
 
 homekit_server_config_t config = {
     .accessories = accessories,
-    .password = "111-11-111" ,
-    .setupId = "1342",
+    .password = "021-54-288",
+    .setupId="1Q84",
     .on_event = on_homekit_event
 };
 
@@ -379,10 +379,10 @@ void singlepress_callback(uint8_t gpio, void *args, const uint8_t param)  {
 void doublepress_callback(uint8_t gpio, void *args, const uint8_t param) { 
     printf(">>>>> Button: Double Press function called using GPIO->%i\n", gpio);
     // double_click_switch = (double_click_switch + 1) % 7;
-    double_click_switch = (double_click_switch == off_effect) ? smooth_effect : off_effect;
-    int effect = double_click_switch;
-    printf("double_click_switch set effect = %i\n", effect);
-    colour_effect_start_stop (effect);
+    // double_click_switch = (double_click_switch == off_effect) ? smooth_effect : off_effect;
+    // int effect = double_click_switch;
+    // printf("double_click_switch set effect = %i\n", effect);
+    // colour_effect_start_stop (effect);
 }
 
 void verylongpress_callback(uint8_t gpio, void *args, const uint8_t param) { 
@@ -394,9 +394,9 @@ void user_init(void) {
     
     standard_init_no_ota (&name, &manufacturer, &model, &serial, &revision);
     
-    
     wifi_config_init(DEVICE_NAME, NULL, on_wifi_ready);
     
+    rgb_lights_init();
 
     adv_button_set_evaluate_delay(10);
     adv_button_create(button_gpio, true, false);  
