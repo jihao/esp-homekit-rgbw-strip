@@ -306,7 +306,7 @@ homekit_accessory_t *accessories[] = {
             NULL
         }),
         HOMEKIT_SERVICE(LIGHTBULB, .primary = true, .characteristics = (homekit_characteristic_t*[]) {
-            HOMEKIT_CHARACTERISTIC(NAME, "LED Strip"),
+            HOMEKIT_CHARACTERISTIC(NAME, "HassLight RGB"),
             &on,
             &saturation,
             &hue,

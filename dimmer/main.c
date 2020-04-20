@@ -125,8 +125,9 @@ homekit_characteristic_t white_gpio   = HOMEKIT_CHARACTERISTIC_( CUSTOM_WHITE_GP
 homekit_characteristic_t colours_gpio_test   = HOMEKIT_CHARACTERISTIC_(CUSTOM_COLOURS_GPIO_TEST, false , .setter=colours_gpio_test_set, .getter=colours_gpio_test_get);
 homekit_characteristic_t colours_strobe = HOMEKIT_CHARACTERISTIC_(CUSTOM_COLOURS_STROBE, false , .setter=colours_strobe_set, .getter=colours_strobe_get);
 homekit_characteristic_t colours_flash = HOMEKIT_CHARACTERISTIC_(CUSTOM_COLOURS_FLASH, false , .setter=colours_flash_set, .getter=colours_flash_get);
-homekit_characteristic_t colours_fade = HOMEKIT_CHARACTERISTIC_(CUSTOM_COLOURS_FADE, false , .setter=colours_fade_set, .getter=colours_smooth_get);
+homekit_characteristic_t colours_fade = HOMEKIT_CHARACTERISTIC_(CUSTOM_COLOURS_FADE, false , .setter=colours_fade_set, .getter=colours_fade_get);
 homekit_characteristic_t colours_smooth = HOMEKIT_CHARACTERISTIC_(CUSTOM_COLOURS_SMOOTH, false ,.setter=colours_smooth_set, .getter=colours_smooth_get);
+homekit_characteristic_t colours_fadein = HOMEKIT_CHARACTERISTIC_(CUSTOM_COLOURS_SMOOTH, false ,.setter=colours_fadein_set, .getter=colours_fadein_get);
 homekit_characteristic_t pure_white   = HOMEKIT_CHARACTERISTIC_(CUSTOM_COLOURS_PURE_WHITE, false , .setter=colours_pure_white_set);
 
 double __ieee754_remainder(double x, double y) {
@@ -324,6 +325,7 @@ homekit_accessory_t *accessories[] = {
             &colours_flash,
             &colours_fade,
             &colours_smooth,
+            &colours_fadein,
             &pure_white,
             NULL
         }),
